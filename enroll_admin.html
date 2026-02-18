@@ -21,66 +21,72 @@
         </form>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, getDocs, addDoc, setDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-        import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyDaeNQF4qmW0vvwxUPp_NztnT0hoLzm1BQ",
-            authDomain: "svls-289ee.firebaseapp.com",
-            projectId: "svls-289ee",
-            storageBucket: "svls-289ee.firebasestorage.app",
-            messagingSenderId: "500705386198",
-            appId: "1:500705386198:web:96f189662bc2aa99cf7377"
-        };
+    // Supabase Configuration
+    const supabaseUrl = 'https://flrxdppyhfegojcrskgp.supabase.co'
+    const supabaseKey = 'EE7r6GWNuO9b_Mcx1I1VMA_M-gfzTnA'
+    const supabase = createClient(supabaseUrl, supabaseKey)
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
+    // Check if Admin exists on load
+    async function checkAdmin() {
+        // Targeted query: Look for at least one user with the 'admin' role
+        const { data, error } = await supabase
+            .from('users')
+            .select('id')
+            .eq('role', 'admin')
+            .limit(1);
 
-        // Check if Admin exists
-        async function checkAdmin() {
-            const querySnapshot = await getDocs(collection(db, "users"));
-            let adminExists = false;
-            querySnapshot.forEach((doc) => {
-                if(doc.data().role === 'admin') adminExists = true;
+        if (data && data.length > 0) {
+            alert("Admin already registered. Redirecting to login.");
+            window.location.href = "login.html";
+        } else {
+            document.getElementById('setup-container').classList.remove('hidden');
+        }
+    }
+
+    checkAdmin();
+
+    document.getElementById('adminRegForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('pw').value;
+        const lastname = document.getElementById('ln').value;
+        const firstname = document.getElementById('fn').value;
+
+        try {
+            // 1. Sign up the user in Supabase Auth
+            const { data: authData, error: authError } = await supabase.auth.signUp({
+                email,
+                password,
             });
 
-            if (adminExists) {
-                alert("Admin already registered. Redirecting to login.");
-                window.location.href = "login.html";
-            } else {
-                document.getElementById('setup-container').classList.remove('hidden');
-            }
-        }
+            if (authError) throw authError;
 
-        checkAdmin();
-
-        document.getElementById('adminRegForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('pw').value;
-
-            try {
-                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                const user = userCredential.user;
-
-                await setDoc(doc(db, "users", user.uid), {
-                    lastname: document.getElementById('ln').value,
-                    firstname: document.getElementById('fn').value,
+            // 2. Create the profile record in the 'users' table
+            const { error: dbError } = await supabase
+                .from('users')
+                .insert([{
+                    id: authData.user.id, // Linking Auth ID to Table ID
+                    lastname: lastname,
+                    firstname: firstname,
                     designation: "Admin Staff",
                     email: email,
                     role: "admin",
                     status: "approved"
-                });
+                }]);
 
-                alert("Admin Created Successfully!");
-                window.location.href = "login.html";
-            } catch (error) {
-                alert(error.message);
-            }
-        });
-    </script>
+            if (dbError) throw dbError;
+
+            alert("Admin Created Successfully!");
+            window.location.href = "login.html";
+
+        } catch (error) {
+            alert(error.message);
+        }
+    });
+</script>
 </body>
 </html>
