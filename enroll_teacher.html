@@ -1,0 +1,348 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Enrollment | SVLS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <style>
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #050505;
+            color: white;
+            margin: 0;
+            overflow-x: hidden;
+        }
+        .logo-container {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0.08;
+            pointer-events: none;
+        }
+        .logo-container img {
+            height: 90%;
+            width: auto;
+            max-width: none;
+            object-fit: contain;
+            filter: grayscale(1) brightness(0.4);
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 2.2rem;
+        }
+        .input-field {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 0.75rem 1.1rem !important;
+            transition: all 0.3s ease;
+            color: white;
+        }
+        .input-field:focus {
+            border-color: rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.08);
+            outline: none;
+        }
+        select.input-field option {
+            background: #1a1a1a;
+            color: white;
+        }
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            filter: invert(1);
+            cursor: pointer;
+            opacity: 0.6;
+        }
+        .btn-anchor {
+            width: 100%;
+            height: 58px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 2rem;
+            position: relative;
+        }
+        #submitBtn {
+            width: 100%;
+            height: 58px;
+            background: white;
+            color: black;
+            border-radius: 9999px;
+            font-weight: 800;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            white-space: nowrap;
+        }
+        #msgModal {
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            z-index: 100;
+        }
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4 py-12">
+
+    <div class="logo-container">
+        <img src="https://sklepagatesting.github.io/resources/Images/CMCSlogo.png" alt="CMCS Logo">
+    </div>
+
+    <div id="msgModal" class="fixed inset-0 bg-black/60 hidden items-center justify-center p-4">
+        <div class="glass-card p-8 max-w-sm w-full text-center border-white/20">
+            <div id="modalIcon" class="text-5xl mb-4"></div>
+            <h3 id="modalTitle" class="text-xl font-bold mb-2">Notice</h3>
+            <p id="modalMsg" class="text-gray-400 text-sm mb-8"></p>
+            <button onclick="closeModal()" class="w-full bg-white text-black py-4 rounded-full font-bold text-sm hover:opacity-90 transition-all">Continue</button>
+        </div>
+    </div>
+
+    <div class="max-w-4xl w-full relative z-10">
+        <div class="text-center mb-10">
+            <img src="https://sklepagatesting.github.io/resources/Images/CMCSlogo.png" alt="Logo" class="w-16 mx-auto mb-6 brightness-125">
+            <h1 class="text-3xl md:text-5xl font-bold tracking-tight mb-2 bg-clip-text text-transparent bg-gradient-to-b from-white to-gray-400">
+                Teacher Enrollment
+            </h1>
+            <p class="text-gray-500 text-xs font-bold uppercase tracking-[0.4em]">Faculty Portal • 2026-2027</p>
+        </div>
+
+        <div class="glass-card p-6 md:p-10">
+            <form id="teacherForm" class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label class="text-gray-400 text-sm ml-1">Last name</label>
+                        <input type="text" id="ln" class="w-full input-field rounded-2xl text-sm font-semibold uppercase" required>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-gray-400 text-sm ml-1">First name</label>
+                        <input type="text" id="fn" class="w-full input-field rounded-2xl text-sm font-semibold uppercase" required>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="space-y-2">
+                        <label class="text-gray-400 text-sm ml-1">Gender</label>
+                        <select id="gender" class="w-full input-field rounded-2xl text-sm font-semibold" required>
+                            <option value="" disabled selected>Select</option>
+                            <option value="MALE">Male</option>
+                            <option value="FEMALE">Female</option>
+                        </select>
+                    </div>
+                    <div class="md:col-span-2 space-y-2">
+                        <label class="text-gray-400 text-sm ml-1">Date of birth</label>
+                        <input type="date" id="bday" class="w-full input-field rounded-2xl text-sm font-semibold" required>
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <label class="text-gray-400 text-sm ml-1">Residential address</label>
+                    <input type="text" id="address" class="w-full input-field rounded-2xl text-sm font-semibold uppercase" required>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-white/5">
+                    <div class="space-y-2">
+                        <label class="text-gray-400 text-sm ml-1">Designation</label>
+                        <select id="designation" class="w-full input-field rounded-2xl text-sm font-semibold uppercase" required>
+                            <option value="" disabled selected>Select</option>
+                            <option value="SUBJECT TEACHER">Subject Teacher</option>
+                            <option value="ADVISER">Adviser</option>
+                        </select>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-gray-400 text-sm ml-1">PRC License number</label>
+                        <input type="text" id="license" maxlength="7" pattern="\d{7}" class="w-full input-field rounded-2xl text-sm font-bold" required>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-white/5">
+                    <div class="space-y-2">
+                        <label class="text-gray-400 text-sm ml-1">Email address</label>
+                        <input type="email" id="email" class="w-full input-field rounded-2xl text-sm font-semibold" required>
+                    </div>
+                    <div class="space-y-2 relative">
+                        <label class="text-gray-400 text-sm ml-1">Password</label>
+                        <div class="relative">
+                            <input type="password" id="pw" class="w-full input-field rounded-2xl text-sm font-semibold pr-12" required>
+                            <button type="button" onclick="togglePassword()" class="absolute right-4 top-1/2 -translate-y-1/2 text-white/30 hover:text-white transition-colors">
+                                <i id="eyeIcon" class="fa-solid fa-eye text-xs"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="btn-anchor">
+                    <button type="submit" id="submitBtn">Send Application</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+<script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+
+    // Supabase Configuration
+    const supabaseUrl = 'https://flrxdppyhfegojcrskgp.supabase.co'
+    const supabaseKey = 'EE7r6GWNuO9b_Mcx1I1VMA_M-gfzTnA'
+    const supabase = createClient(supabaseUrl, supabaseKey)
+
+    // --- Disable Autofill logic ---
+    const inputs = document.querySelectorAll('.input-field');
+    inputs.forEach(input => {
+        input.setAttribute('readonly', 'readonly');
+        input.style.cursor = 'text';
+        const stopReadOnly = () => {
+            input.removeAttribute('readonly');
+            input.removeEventListener('focus', stopReadOnly);
+            input.removeEventListener('mousedown', stopReadOnly);
+        };
+        input.addEventListener('focus', stopReadOnly);
+        input.addEventListener('mousedown', stopReadOnly);
+    });
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const editId = urlParams.get('edit');
+    const btn = document.getElementById('submitBtn');
+    let activeTl;
+    let redirectOnClose = false;
+
+    window.togglePassword = () => {
+        const pw = document.getElementById('pw');
+        const icon = document.getElementById('eyeIcon');
+        pw.type = pw.type === 'password' ? 'text' : 'password';
+        icon.classList.toggle('fa-eye'); icon.classList.toggle('fa-eye-slash');
+    };
+
+    window.showModal = (title, msg, type = 'success', redirect = false) => {
+        document.getElementById('modalTitle').innerText = title;
+        document.getElementById('modalMsg').innerText = msg;
+        const icon = document.getElementById('modalIcon');
+        icon.innerHTML = type === 'success' ? '<i class="fa-solid fa-circle-check text-emerald-500"></i>' : '<i class="fa-solid fa-circle-xmark text-rose-500"></i>';
+        document.getElementById('msgModal').style.display = 'flex';
+        redirectOnClose = redirect;
+    };
+
+    window.closeModal = () => {
+        document.getElementById('msgModal').style.display = 'none';
+        if(redirectOnClose) window.close(); 
+    };
+
+    async function checkEditMode() {
+        if (!editId) return;
+        document.querySelector('h1').innerText = "Edit Profile";
+        btn.innerText = "Update Profile";
+        document.getElementById('pw').closest('.space-y-2').parentElement.classList.add('hidden');
+        document.getElementById('email').readOnly = true;
+
+        const { data: d, error } = await supabase.from('users').select('*').eq('id', editId).single();
+        
+        if (!error && d) {
+            document.getElementById('ln').value = d.lastname;
+            document.getElementById('fn').value = d.firstname;
+            document.getElementById('gender').value = d.gender;
+            document.getElementById('bday').value = d.birthdate;
+            document.getElementById('address').value = d.address;
+            document.getElementById('designation').value = d.designation;
+            document.getElementById('license').value = d.license;
+            document.getElementById('email').value = d.email;
+        }
+    }
+
+    document.getElementById('teacherForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        if(activeTl) activeTl.kill();
+        activeTl = gsap.timeline({ defaults: { ease: "power4.inOut" } });
+
+        activeTl.to(btn, {
+            width: "160px", height: "40px", backgroundColor: "rgba(255, 255, 255, 0.1)",
+            color: "#ffffff", fontSize: "12px", duration: 1.2, innerText: "Verifying", opacity: 0.6
+        });
+
+        const firstName = document.getElementById('fn').value.toUpperCase().trim();
+        const lastName = document.getElementById('ln').value.toUpperCase().trim();
+        const license = document.getElementById('license').value.trim();
+        const email = document.getElementById('email').value.trim().toLowerCase();
+
+        try {
+            if (!editId) {
+                // DUPLICATION PREVENTION
+                const { data: existingUser, error: checkError } = await supabase
+                    .from('users')
+                    .select('id, license, firstname, lastname')
+                    .or(`license.eq.${license},and(firstname.eq.${firstName},lastname.eq.${lastName})`);
+
+                if (existingUser && existingUser.length > 0) {
+                    const isLicense = existingUser.some(u => u.license === license);
+                    throw new Error(isLicense ? "License number already registered." : "A faculty member with this name already exists.");
+                }
+            }
+
+            const userData = {
+                lastname: lastName,
+                firstname: firstName,
+                gender: document.getElementById('gender').value.toUpperCase(),
+                birthdate: document.getElementById('bday').value,
+                address: document.getElementById('address').value.toUpperCase(),
+                designation: document.getElementById('designation').value.toUpperCase(),
+                license: license,
+            };
+
+            if (editId) {
+                const { error: updateError } = await supabase.from('users').update(userData).eq('id', editId);
+                if (updateError) throw updateError;
+
+                activeTl.to(btn, { width: "100%", height: "58px", backgroundColor: "#fff", color: "#000", innerText: "Updated" });
+                showModal("Success", "Profile information updated.", "success", true);
+            } else {
+                const password = document.getElementById('pw').value;
+                
+                // 1. Auth Sign Up
+                const { data: authData, error: authError } = await supabase.auth.signUp({
+                    email,
+                    password,
+                });
+
+                if (authError) throw authError;
+
+                // 2. Insert Profile
+                const { error: dbError } = await supabase.from('users').insert([{
+                    ...userData,
+                    id: authData.user.id,
+                    email,
+                    role: "teacher",
+                    status: "pending"
+                }]);
+
+                if (dbError) throw dbError;
+
+                activeTl.to(btn, { width: "100%", height: "58px", backgroundColor: "#fff", color: "#000", innerText: "Applied" });
+                showModal("Application Sent", "Your faculty record is now pending review.", "success", true);
+            }
+        } catch (error) {
+            if(activeTl) activeTl.kill();
+            activeTl = gsap.timeline({ defaults: { ease: "power4.inOut" } });
+            activeTl.to(btn, { backgroundColor: "rgba(255, 59, 48, 0.2)", innerText: "Denied", color: "#ff3b30", duration: 0.4 })
+                    .to(btn, { x: -4, duration: 0.1, repeat: 3, yoyo: true }, 0)
+                    .to(btn, { width: "100%", height: "58px", backgroundColor: "#fff", color: "#000", innerText: editId ? "Update Profile" : "Send Application", x: 0, delay: 1.5 });
+            
+            showModal("Error", error.message, "error");
+        }
+    });
+
+    checkEditMode();
+</script>
+</body>
+</html>
