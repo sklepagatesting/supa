@@ -1,0 +1,383 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Approvals | CMCS VLS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #050505; color: white; overflow: hidden; }
+        .logo-watermark { position: fixed; inset: 0; z-index: -1; display: flex; justify-content: center; align-items: center; opacity: 0.06; pointer-events: none; }
+        .logo-watermark img { height: 80%; max-width: none; filter: grayscale(1) brightness(0.5); }
+        .glass-card { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 1.5rem; }
+        .nav-link { transition: all 0.3s ease; border: 1px solid transparent; }
+        .nav-link:hover { background: rgba(255, 255, 255, 0.05); border-color: rgba(255, 255, 255, 0.1); }
+        .nav-link.active { background: white; color: black !important; }
+        .sidebar { background: rgba(0, 0, 0, 0.3); backdrop-filter: blur(20px); border-right: 1px solid rgba(255, 255, 255, 0.05); }
+        .action-btn { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+        .action-btn:hover { transform: translateY(-2px); }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+    </style>
+</head>
+<body class="h-screen flex">
+
+    <div class="logo-watermark">
+        <img src="https://sklepagatesting.github.io/resources/Images/CMCSlogo.png" alt="CMCS Logo">
+    </div>
+
+    <aside class="w-72 sidebar flex flex-col z-20">
+        <div class="h-20 flex items-center px-8 border-b border-white/5">
+            <div class="flex items-center gap-3">
+                <img src="https://sklepagatesting.github.io/resources/Images/CMCSlogo.png" class="h-8 brightness-125">
+                <span class="font-black text-lg tracking-tighter uppercase">CMCS <span class="text-gray-500">VLS</span></span>
+            </div>
+        </div>
+
+        <nav class="flex-1 py-8 px-4 space-y-2 overflow-y-auto">
+            <p class="px-4 text-[10px] font-bold text-gray-500 uppercase tracking-[0.3em] mb-4">Main Menu</p>
+            <a href="admin_dashboard.html" class="nav-link flex items-center gap-4 px-4 py-3.5 rounded-2xl text-sm font-semibold text-gray-400">
+                <i class="fa-solid fa-chart-line text-base"></i> Dashboard
+            </a>
+            <a href="admin_approval.html" class="nav-link active flex items-center gap-4 px-4 py-3.5 rounded-2xl text-sm font-semibold">
+                <i class="fa-solid fa-check-to-slot text-base"></i> Approvals
+            </a>
+            <a href="admin_setup.html" class="nav-link flex items-center gap-4 px-4 py-3.5 rounded-2xl text-sm font-semibold text-gray-400">
+                <i class="fa-solid fa-school text-base"></i> Academic Setup
+            </a>
+            <a href="admin_class.html" class="nav-link flex items-center gap-4 px-4 py-3.5 rounded-2xl text-sm font-semibold text-gray-400">
+                <i class="fa-solid fa-chalkboard-user text-base"></i> Class Assignment
+            </a>
+            <a href="admin_records.html" class="nav-link flex items-center gap-4 px-4 py-3.5 rounded-2xl text-sm font-semibold text-gray-400">
+                <i class="fa-solid fa-folder-open text-base"></i> Master Record
+            </a>
+            <a href="admin_accounts.html" class="nav-link flex items-center gap-4 px-4 py-3.5 rounded-2xl text-sm font-semibold text-gray-400">
+                <i class="fa-solid fa-users-gear text-base"></i> Accounts
+            </a>
+        </nav>
+
+        <div class="p-6 border-t border-white/5">
+            <a href="admin_edit.html" class="glass-card p-4 flex items-center gap-3 mb-4 block hover:border-white/20 transition-all">
+                <div id="adminInitial" class="w-10 h-10 rounded-full bg-white flex items-center justify-center text-xs font-bold text-black uppercase">AD</div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-xs font-bold truncate uppercase text-white" id="adminName">Loading...</p>
+                    <p class="text-[9px] text-gray-500 font-bold uppercase tracking-widest">Administrator</p>
+                </div>
+            </a>
+            <button onclick="logout()" class="w-full py-3 rounded-xl bg-red-500/10 text-red-500 text-[10px] font-black uppercase tracking-[0.2em] hover:bg-red-500 hover:text-white transition-all">
+                Sign Out
+            </button>
+        </div>
+    </aside>
+
+    <main class="flex-1 flex flex-col overflow-hidden">
+        <header class="h-20 flex items-center justify-between px-10 border-b border-white/5">
+            <h1 class="text-sm font-bold uppercase tracking-[0.2em] text-gray-400">Requests <span class="text-white">Processing</span></h1>
+            <div class="text-right">
+                    <p id="clock" class="text-sm font-black tracking-widest text-white">--:--</p>
+                    <p id="currentDate" class="text-[10px] font-bold text-gray-500 uppercase">--- --, ----</p>
+                </div>
+        </header>
+
+        <div class="flex-1 overflow-y-auto p-10 space-y-10">
+            <div class="glass-card overflow-hidden">
+                <div class="px-8 py-6 border-b border-white/5 flex justify-between items-center bg-white/[0.01]">
+                    <div>
+                        <h2 class="font-black text-white text-xs uppercase tracking-[0.2em]">Student Admissions</h2>
+                        <p class="text-[10px] text-gray-500 uppercase font-bold mt-1">Pending verification</p>
+                    </div>
+                    <button onclick="window.open('enroll.html', '_blank')" class="bg-white text-black px-5 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-all">
+                        Manual Admission
+                    </button>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead>
+                            <tr class="text-[10px] font-bold text-gray-500 uppercase tracking-widest border-b border-white/5">
+                                <th class="px-8 py-4">Student & ID</th>
+                                <th class="px-8 py-4">Bio / Info</th>
+                                <th class="px-8 py-4">Course Details</th>
+                                <th class="px-8 py-4 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="studentTable" class="divide-y divide-white/5">
+                            <tr><td colspan="4" class="px-8 py-10 text-center text-gray-500 text-xs font-bold uppercase tracking-widest italic animate-pulse">Synchronizing Data...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="glass-card overflow-hidden">
+                <div class="px-8 py-6 border-b border-white/5 flex justify-between items-center bg-white/[0.01]">
+                    <div>
+                        <h2 class="font-black text-white text-xs uppercase tracking-[0.2em]">Faculty Registration</h2>
+                        <p class="text-[10px] text-gray-500 uppercase font-bold mt-1">Academic Staff Requests</p>
+                    </div>
+                    <button onclick="window.open('enroll_teacher.html', '_blank')" class="border border-white/10 text-white px-5 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-white/5 transition-all">
+                        Manual Hire
+                    </button>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead>
+                            <tr class="text-[10px] font-bold text-gray-500 uppercase tracking-widest border-b border-white/5">
+                                <th class="px-8 py-4">Instructor & License</th>
+                                <th class="px-8 py-4">Bio / Info</th>
+                                <th class="px-8 py-4">Designation</th>
+                                <th class="px-8 py-4 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="facultyTable" class="divide-y divide-white/5">
+                            <tr><td colspan="4" class="px-8 py-10 text-center text-gray-500 text-xs font-bold uppercase tracking-widest italic animate-pulse">Synchronizing Data...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="notifModal" class="fixed inset-0 bg-black/80 backdrop-blur-md hidden items-center justify-center z-[100] p-4">
+        <div class="glass-card max-w-sm w-full p-8 text-center border-white/20">
+            <h3 class="text-sm font-black text-white uppercase tracking-widest mb-4">System Notice</h3>
+            <p id="notifMessage" class="text-sm text-gray-400 mb-8 leading-relaxed"></p>
+            <div id="confirmActions" class="hidden flex flex-col gap-3">
+                <button id="btnYes" class="w-full bg-white text-black py-4 rounded-full font-black text-[10px] uppercase tracking-widest hover:opacity-90 transition-all">Confirm Action</button>
+                <button onclick="closeModal('notifModal')" class="w-full border border-white/10 text-white py-4 rounded-full font-black text-[10px] uppercase tracking-widest hover:bg-white/5">Cancel</button>
+            </div>
+            <div id="alertActions">
+                <button onclick="closeModal('notifModal')" class="w-full bg-white text-black py-4 rounded-full font-black text-[10px] uppercase tracking-widest">Dismiss</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="detailsModal" class="fixed inset-0 bg-black/80 backdrop-blur-md hidden items-center justify-center z-50 p-4">
+        <div class="glass-card w-full max-w-xl overflow-hidden border-white/20">
+            <div class="px-8 py-6 border-b border-white/5 flex justify-between items-center bg-white/[0.02]">
+                <h3 class="font-black text-white uppercase tracking-widest text-xs">Credential Review</h3>
+                <button onclick="closeModal('detailsModal')" class="text-gray-500 hover:text-white transition-colors"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="p-8 grid grid-cols-2 gap-6 max-h-[60vh] overflow-y-auto" id="detailsContent"></div>
+            <div class="p-8 border-t border-white/5 bg-black/20 flex gap-4">
+                <button id="modalApproveBtn" class="flex-1 bg-white text-black py-4 rounded-full font-black text-[10px] uppercase tracking-widest hover:opacity-90 transition-all">Approve Account</button>
+                <button id="modalRejectBtn" class="flex-1 border border-red-500/50 text-red-500 py-4 rounded-full font-black text-[10px] uppercase tracking-widest hover:bg-red-500/10 transition-all">Reject Request</button>
+            </div>
+        </div>
+    </div>
+
+<script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+
+    // Supabase Configuration
+    const supabaseUrl = 'https://flrxdppyhfegojcrskgp.supabase.co'
+    const supabaseKey = 'EE7r6GWNuO9b_Mcx1I1VMA_M-gfzTnA'
+    const supabase = createClient(supabaseUrl, supabaseKey)
+
+    // UI Helpers: Clock & Date
+    setInterval(() => {
+        const clock = document.getElementById('clock');
+        if (clock) clock.innerText = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+    }, 1000);
+
+    const updateDate = () => {
+        const el = document.getElementById('currentDate');
+        if (el) el.innerText = new Date().toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+    };
+    updateDate();
+
+    const calculateAge = (bday) => {
+        if (!bday) return "";
+        const today = new Date();
+        const birthDate = new Date(bday);
+        let age = today.getFullYear() - birthDate.getFullYear();
+        const m = today.getMonth() - birthDate.getMonth();
+        if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) age--;
+        return age;
+    };
+
+    // --- Auth & Session Check ---
+    const checkUser = async () => {
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (session) {
+            const { data: userProfile, error } = await supabase
+                .from('users')
+                .select('*')
+                .eq('id', session.user.id)
+                .single();
+
+            if (!error && userProfile.role === 'admin') {
+                document.getElementById('adminName').innerText = `${userProfile.lastname}, ${userProfile.firstname}`.toUpperCase();
+                document.getElementById('adminInitial').innerText = (userProfile.firstname[0] + userProfile.lastname[0]).toUpperCase();
+                
+                // Initial fetch and start Real-time listener
+                fetchPendingUsers();
+                startSupabaseSubscription();
+            } else {
+                window.location.href = "login.html";
+            }
+        } else {
+            window.location.href = "login.html";
+        }
+    };
+
+    // --- Real-time Subscription ---
+    function startSupabaseSubscription() {
+        supabase
+            .channel('public:users')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'users', filter: 'status=eq.pending' }, () => {
+                fetchPendingUsers();
+            })
+            .subscribe();
+    }
+
+    // --- Fetch Data ---
+    async function fetchPendingUsers() {
+        const { data: pendingUsers, error } = await supabase
+            .from('users')
+            .select('*')
+            .eq('status', 'pending');
+
+        const sTable = document.getElementById('studentTable');
+        const fTable = document.getElementById('facultyTable');
+        let sContent = ''; let fContent = '';
+
+        if (error || !pendingUsers || pendingUsers.length === 0) {
+            const emptyRow = '<tr><td colspan="4" class="px-8 py-10 text-center text-gray-500 text-[10px] font-bold uppercase tracking-widest italic">Clear - No Pending Requests</td></tr>';
+            sTable.innerHTML = emptyRow;
+            fTable.innerHTML = emptyRow;
+            return;
+        }
+
+        pendingUsers.forEach(d => {
+            const age = calculateAge(d.birthdate);
+            const actions = `
+                <div class="flex justify-end gap-3">
+                    <button onclick="viewDetails('${d.id}')" class="action-btn px-4 py-2 border border-white/10 text-white rounded-full hover:bg-white hover:text-black transition text-[9px] font-black uppercase tracking-widest">Review</button>
+                    <button onclick="handleAction('${d.id}', true)" class="action-btn w-10 h-10 flex items-center justify-center bg-white text-black rounded-full hover:opacity-80"><i class="fa-solid fa-check text-xs"></i></button>
+                    <button onclick="handleAction('${d.id}', false)" class="action-btn w-10 h-10 flex items-center justify-center border border-red-500/30 text-red-500 rounded-full hover:bg-red-500/10"><i class="fa-solid fa-xmark text-xs"></i></button>
+                </div>`;
+
+            if (d.role === 'student') {
+                sContent += `
+                <tr class="hover:bg-white/[0.02] transition-colors">
+                    <td class="px-8 py-5">
+                        <p class="font-bold text-white text-sm uppercase">${d.lastname}, ${d.firstname}</p>
+                        <p class="text-[9px] text-gray-500 font-black uppercase tracking-tighter">${d.studentId || 'ID PENDING'}</p>
+                    </td>
+                    <td class="px-8 py-5">
+                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">${d.gender} / ${age} Years</p>
+                        <p class="text-[10px] text-blue-400 font-bold lowercase">${d.email}</p>
+                    </td>
+                    <td class="px-8 py-5">
+                        <p class="text-[10px] text-white font-black uppercase tracking-tighter">${d.course}</p>
+                        <p class="text-[9px] text-gray-500 font-bold uppercase tracking-widest">Year ${d.year}</p>
+                    </td>
+                    <td class="px-8 py-5">${actions}</td>
+                </tr>`;
+            } else if (d.role === 'teacher') {
+                fContent += `
+                <tr class="hover:bg-white/[0.02] transition-colors">
+                    <td class="px-8 py-5">
+                        <p class="font-bold text-white text-sm uppercase">${d.lastname}, ${d.firstname}</p>
+                        <p class="text-[9px] text-gray-500 font-black uppercase tracking-tighter">LIC: ${d.license || 'N/A'}</p>
+                    </td>
+                    <td class="px-8 py-5">
+                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">${d.gender} / ${age} Years</p>
+                        <p class="text-[10px] text-blue-400 font-bold lowercase">${d.email}</p>
+                    </td>
+                    <td class="px-8 py-5 text-[10px] font-black text-white uppercase tracking-widest">${d.designation || 'FACULTY'}</td>
+                    <td class="px-8 py-5">${actions}</td>
+                </tr>`;
+            }
+        });
+
+        sTable.innerHTML = sContent || '<tr><td colspan="4" class="px-8 py-10 text-center text-gray-500 text-[10px] font-bold uppercase tracking-widest italic">No Student Admissions</td></tr>';
+        fTable.innerHTML = fContent || '<tr><td colspan="4" class="px-8 py-10 text-center text-gray-500 text-[10px] font-bold uppercase tracking-widest italic">No Faculty Requests</td></tr>';
+    }
+
+    // --- Actions ---
+    window.viewDetails = async (uid) => {
+        const { data: d, error } = await supabase.from('users').select('*').eq('id', uid).single();
+        if (error || !d) return;
+
+        const container = document.getElementById('detailsContent');
+        let fields = '';
+        
+        const createField = (label, val) => `
+            <div class="space-y-1.5">
+                <label class="text-[9px] font-black text-gray-500 uppercase tracking-widest">${label}</label>
+                <div class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-[12px] text-white font-semibold truncate">
+                    ${val || '---'}
+                </div>
+            </div>`;
+
+        fields += createField('Last Name', d.lastname);
+        fields += createField('First Name', d.firstname);
+        fields += createField('Gender', d.gender);
+        fields += createField('Birthdate', d.birthdate);
+        fields += createField('Email', d.email);
+        fields += createField('Address', d.address);
+
+        if (d.role === 'student') {
+            fields += createField('Student ID', d.studentId);
+            fields += createField('Course', d.course);
+            fields += createField('Year', d.year);
+        } else {
+            fields += createField('Designation', d.designation);
+            fields += createField('License', d.license);
+        }
+
+        container.innerHTML = fields;
+        document.getElementById('modalApproveBtn').onclick = () => { closeModal('detailsModal'); handleAction(uid, true); };
+        document.getElementById('modalRejectBtn').onclick = () => { closeModal('detailsModal'); handleAction(uid, false); };
+        document.getElementById('detailsModal').classList.replace('hidden', 'flex');
+    };
+
+    window.handleAction = (uid, approved) => {
+        const msg = approved ? "Grant access and approve this user account?" : "Confirm permanent deletion of this registration request?";
+        showNotif(msg, true, async () => {
+            try {
+                if (approved) {
+                    const { error } = await supabase.from('users').update({ status: 'approved' }).eq('id', uid);
+                    if (error) throw error;
+                } else {
+                    const { error } = await supabase.from('users').delete().eq('id', uid);
+                    if (error) throw error;
+                }
+                showNotif(approved ? "ACCOUNT ACTIVATED" : "REQUEST PURGED");
+                fetchPendingUsers(); // Refresh table
+            } catch (e) { 
+                showNotif("Error: " + e.message); 
+            }
+        });
+    };
+
+    window.showNotif = (msg, isConfirm = false, onYes = null) => {
+        document.getElementById('notifMessage').innerText = msg;
+        const cAct = document.getElementById('confirmActions');
+        const aAct = document.getElementById('alertActions');
+        if (isConfirm) {
+            cAct.classList.remove('hidden'); aAct.classList.add('hidden');
+            document.getElementById('btnYes').onclick = () => { if(onYes) onYes(); closeModal('notifModal'); };
+        } else {
+            cAct.classList.add('hidden'); aAct.classList.remove('hidden');
+        }
+        document.getElementById('notifModal').classList.replace('hidden', 'flex');
+    };
+
+    window.closeModal = (id) => { document.getElementById(id).classList.replace('flex', 'hidden'); };
+    
+    window.logout = async () => {
+        await supabase.auth.signOut();
+        window.location.href = "login.html";
+    };
+
+    // Initialize
+    checkUser();
+</script>
+</body>
+</html>
