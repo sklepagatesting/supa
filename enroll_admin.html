@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Registration</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-black min-h-screen flex items-center justify-center p-6">
+    <div id="setup-container" class="max-w-md w-full bg-white border-2 border-black p-8 hidden">
+        <h2 class="text-2xl font-bold mb-6 uppercase tracking-tighter">Register Admin Staff</h2>
+        <form id="adminRegForm" class="space-y-4">
+            <div class="grid grid-cols-2 gap-4">
+                <input type="text" id="ln" placeholder="Lastname" class="border-2 border-black p-2 outline-none focus:bg-yellow-50" required>
+                <input type="text" id="fn" placeholder="Firstname" class="border-2 border-black p-2 outline-none focus:bg-yellow-50" required>
+            </div>
+            <input type="text" id="designation" value="Admin Staff" readonly class="w-full border-2 border-black p-2 bg-gray-100 italic">
+            <input type="email" id="email" placeholder="Gmail Address" class="w-full border-2 border-black p-2 outline-none" required>
+            <input type="password" id="pw" placeholder="Password" class="w-full border-2 border-black p-2 outline-none" required>
+            <button type="submit" class="w-full bg-black text-white py-3 font-bold hover:invert transition">CREATE ADMIN ACCOUNT</button>
+        </form>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, getDocs, addDoc, setDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDaeNQF4qmW0vvwxUPp_NztnT0hoLzm1BQ",
+            authDomain: "svls-289ee.firebaseapp.com",
+            projectId: "svls-289ee",
+            storageBucket: "svls-289ee.firebasestorage.app",
+            messagingSenderId: "500705386198",
+            appId: "1:500705386198:web:96f189662bc2aa99cf7377"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        // Check if Admin exists
+        async function checkAdmin() {
+            const querySnapshot = await getDocs(collection(db, "users"));
+            let adminExists = false;
+            querySnapshot.forEach((doc) => {
+                if(doc.data().role === 'admin') adminExists = true;
+            });
+
+            if (adminExists) {
+                alert("Admin already registered. Redirecting to login.");
+                window.location.href = "login.html";
+            } else {
+                document.getElementById('setup-container').classList.remove('hidden');
+            }
+        }
+
+        checkAdmin();
+
+        document.getElementById('adminRegForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('pw').value;
+
+            try {
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+
+                await setDoc(doc(db, "users", user.uid), {
+                    lastname: document.getElementById('ln').value,
+                    firstname: document.getElementById('fn').value,
+                    designation: "Admin Staff",
+                    email: email,
+                    role: "admin",
+                    status: "approved"
+                });
+
+                alert("Admin Created Successfully!");
+                window.location.href = "login.html";
+            } catch (error) {
+                alert(error.message);
+            }
+        });
+    </script>
+</body>
+</html>
